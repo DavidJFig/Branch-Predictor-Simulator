@@ -10,9 +10,9 @@
 
 
 // Global variables
-int gshare; // global history register size
-int GPB; // global pattern buffer size
-int RB; // return buffer size
+char* gshare; // gshare mode
+int M; // number of bits to index the gshare table
+int N; // number of bits for the global history register
 
 
 
@@ -31,22 +31,22 @@ void simulatePrediction(unsigned long long int address, char taken)
 int main(int argc, char **argv)
 {
     // check if the number of arguments is correct
-    if (argc != 4) {
+    if (argc != 5) {
         printf("Error: Must run with 4 arguments: 'gshare' <GPB> <RB> <Trace_File>\n");
         return 1;
     }
 
     // read the cache configuration from the command line arguments
-    gshare = atoi(argv[1]);
-    GPB = atoi(argv[2]);
-    RB = atoi(argv[3]);
+    gshare = argv[1];
+    M = atoi(argv[2]);
+    N = atoi(argv[3]);
     char* TRACE_FILENAME = argv[4];
 
 
     // print out the command line arguments
-    printf("gshare: %d\n", gshare);
-    printf("GPB: %d\n", GPB);
-    printf("RB: %d\n", RB);
+    printf("gshare: %s\n", gshare);
+    printf("GPB (M): %d\n", M);
+    printf("RB (N): %d\n", N);
     printf("Trace file: %s\n", TRACE_FILENAME);
 
 
@@ -66,8 +66,8 @@ int main(int argc, char **argv)
     while (!feof(file)) {
         // read operation and address
         fscanf(file, "%llx %c", &address, &taken);
-        printf("Address: %llx\n", address);
-        printf("Taken: %c\n", taken);
+        //printf("Address: %llx\n", address);
+        //printf("Taken: %c\n", taken);
 
         // simulate each branch prediction
         simulatePrediction(address, taken);
