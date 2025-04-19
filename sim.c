@@ -6,8 +6,6 @@
 #include <stdlib.h>
 
 
-// Constants
-
 
 // Global variables
 char* gshare; // gshare mode
@@ -21,22 +19,19 @@ int *predictionTable; // holds the taken / not taken prediction of each entry
 
 
 
-
-
-// Global variables to maintain the simulation statistics
+// Simulation statistics
 int mispredictions = 0; // number of mispredictions
 int predictions = 0; // number of predictions made
 
 
 void predictBranch(unsigned long long int address, bool takenOutcome)
 {
-    printf("Predicting branch for address: %llx\n", address);
     // remove the first 2 bits of the address
     address = address >> 2; 
 
 
     // get the index of the prediction table using the GHR and the address
-    unsigned int index;
+    unsigned long long int index;
     if (N > 0)
     {
         index = (address ^ (GHR << (M - N)));
@@ -45,6 +40,9 @@ void predictBranch(unsigned long long int address, bool takenOutcome)
     {
         index = address;
     }
+
+    // take the last M bits of the index
+    index = index & ((1 << M) - 1); 
 
     bool prediction = predictionTable[index] >= 2; // true for taken, false for not taken
 
@@ -58,6 +56,7 @@ void predictBranch(unsigned long long int address, bool takenOutcome)
             predictionTable[index]--;
         }
     }
+
     if (prediction != takenOutcome)
     {
         mispredictions++; // increment the number of mispredictions
@@ -65,7 +64,7 @@ void predictBranch(unsigned long long int address, bool takenOutcome)
     predictions++; // increment the number of predictions made
 
     // update the GHR
-    GHR = GHR & (1 << N);
+    GHR = GHR | ((takenOutcome == true ? 1 : 0) << N);
     GHR = GHR >> 1;
     
     return;
@@ -121,11 +120,8 @@ int main(int argc, char **argv)
 
     // read until end of file
     while (!feof(file)) {
-        printf("Looping...\n");
         // read operation and address
         fscanf(file, "%llx %c", &address, &takenChar);
-        // print out the operation and address
-        printf("Operation: %c, Address: %llx\n", takenChar, address);
 
         taken = (takenChar == 't') ? true : false; // convert char to bool        
 
