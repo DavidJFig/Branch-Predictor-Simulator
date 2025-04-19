@@ -15,7 +15,7 @@ char* gshare; // gshare mode
 int M; // number of bits to index the gshare table
 int N; // number of bits for the global history register
 
-int GHR; // global history register
+unsigned int GHR; // global history register
 int *predictionTable; // holds the taken / not taken prediction of each entry
 
 
@@ -24,11 +24,50 @@ int *predictionTable; // holds the taken / not taken prediction of each entry
 
 
 // Global variables to maintain the simulation statistics
+int mispredictions = 0; // number of mispredictions
+int predictions = 0; // number of predictions made
 
 
-
-void predictBranch(unsigned long long int address, bool taken)
+void predictBranch(unsigned long long int address, bool takenOutcome)
 {
+    printf("Predicting branch for address: %llx\n", address);
+    // remove the first 2 bits of the address
+    address = address >> 2; 
+
+
+    // get the index of the prediction table using the GHR and the address
+    unsigned int index;
+    if (N > 0)
+    {
+        index = (address ^ (GHR << (M - N)));
+    }
+    else
+    {
+        index = address;
+    }
+
+    bool prediction = predictionTable[index] >= 2; // true for taken, false for not taken
+
+    // update the prediction table
+    if (takenOutcome) {
+        if (predictionTable[index] < 3) {
+            predictionTable[index]++;
+        }
+    } else {
+        if (predictionTable[index] > 0) {
+            predictionTable[index]--;
+        }
+    }
+    if (prediction != takenOutcome)
+    {
+        mispredictions++; // increment the number of mispredictions
+    }
+    predictions++; // increment the number of predictions made
+
+    // update the GHR
+    GHR = GHR & (1 << N);
+    GHR = GHR >> 1;
+    
     return;
 }
 
@@ -74,6 +113,7 @@ int main(int argc, char **argv)
         predictionTable[i] = 2; // initialize all entries to weakly taken
     }
 
+    printf("Prediction table initialized with %d entries.\n", (1 << M));
 
     unsigned long long int address;
     char takenChar; // 't' or 'n'
@@ -81,8 +121,11 @@ int main(int argc, char **argv)
 
     // read until end of file
     while (!feof(file)) {
+        printf("Looping...\n");
         // read operation and address
         fscanf(file, "%llx %c", &address, &takenChar);
+        // print out the operation and address
+        printf("Operation: %c, Address: %llx\n", takenChar, address);
 
         taken = (takenChar == 't') ? true : false; // convert char to bool        
 
@@ -97,6 +140,9 @@ int main(int argc, char **argv)
     free(predictionTable);
 
     // print out the statistics
+    printf("Number of predictions: %d\n", predictions);
+    printf("Number of mispredictions: %d\n", mispredictions);
+    printf("Misprediction rate: %.2f%%\n", (float)mispredictions / predictions * 100.0);
 
     return 0;
 }
