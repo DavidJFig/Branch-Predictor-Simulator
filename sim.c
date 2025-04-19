@@ -11,8 +11,14 @@
 
 // Global variables
 char* gshare; // gshare mode
+
 int M; // number of bits to index the gshare table
 int N; // number of bits for the global history register
+
+int GHR; // global history register
+int *predictionTable; // holds the taken / not taken prediction of each entry
+
+
 
 
 
@@ -21,7 +27,7 @@ int N; // number of bits for the global history register
 
 
 
-void simulatePrediction(unsigned long long int address, char taken)
+void predictBranch(unsigned long long int address, bool taken)
 {
     return;
 }
@@ -59,25 +65,36 @@ int main(int argc, char **argv)
         return 1;
     }
 
+
+    // initialize the global history register and the prediction table
+    GHR = 0; 
+    predictionTable = (int*) malloc((1 << M) * sizeof(int)); // 2^M entries
+
+    for (int i = 0; i < (1 << M); i++) {
+        predictionTable[i] = 2; // initialize all entries to weakly taken
+    }
+
+
     unsigned long long int address;
-    char taken;
+    char takenChar; // 't' or 'n'
+    bool taken; // true for taken, false for not taken
 
     // read until end of file
     while (!feof(file)) {
         // read operation and address
-        fscanf(file, "%llx %c", &address, &taken);
-        //printf("Address: %llx\n", address);
-        //printf("Taken: %c\n", taken);
+        fscanf(file, "%llx %c", &address, &takenChar);
+
+        taken = (takenChar == 't') ? true : false; // convert char to bool        
 
         // simulate each branch prediction
-        simulatePrediction(address, taken);
+        predictBranch(address, taken);
     }
 
     // close the trace file
     fclose(file);
 
     // free the allocated memory
-    
+    free(predictionTable);
 
     // print out the statistics
 
