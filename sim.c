@@ -8,7 +8,7 @@
 
 
 // Global variables
-char* gshare; // gshare mode
+char* gshare; // gshare mode, not used (it's always gshare)
 
 int M; // number of bits to index the gshare table
 int N; // number of bits for the global history register
@@ -21,7 +21,7 @@ int *predictionTable; // holds the taken / not taken prediction of each entry
 
 // Simulation statistics
 int mispredictions = 0; // number of mispredictions
-int predictions = 0; // number of predictions made
+int predictions = 0; // total number of predictions made
 
 
 void predictBranch(unsigned long long int address, bool takenOutcome)
@@ -57,17 +57,16 @@ void predictBranch(unsigned long long int address, bool takenOutcome)
         }
     }
 
+    // update statistics
     if (prediction != takenOutcome)
     {
-        mispredictions++; // increment the number of mispredictions
+        mispredictions++; 
     }
-    predictions++; // increment the number of predictions made
+    predictions++; 
 
     // update the GHR
     GHR = GHR | ((takenOutcome == true ? 1 : 0) << N);
-    GHR = GHR >> 1;
-    
-    return;
+    GHR = GHR >> 1;   
 }
 
 
@@ -80,7 +79,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    // read the cache configuration from the command line arguments
+    // read the configuration from the command line arguments
     gshare = argv[1];
     M = atoi(argv[2]);
     N = atoi(argv[3]);
@@ -88,10 +87,10 @@ int main(int argc, char **argv)
 
 
     // print out the command line arguments
-    printf("gshare: %s\n", gshare);
-    printf("GPB (M): %d\n", M);
-    printf("RB (N): %d\n", N);
-    printf("Trace file: %s\n", TRACE_FILENAME);
+    // printf("gshare: %s\n", gshare);
+    // printf("GPB (M): %d\n", M);
+    // printf("RB (N): %d\n", N);
+    // printf("Trace file: %s\n", TRACE_FILENAME);
 
 
 
@@ -112,7 +111,7 @@ int main(int argc, char **argv)
         predictionTable[i] = 2; // initialize all entries to weakly taken
     }
 
-    printf("Prediction table initialized with %d entries.\n", (1 << M));
+    // printf("Prediction table initialized with %d entries.\n", (1 << M));
 
     unsigned long long int address;
     char takenChar; // 't' or 'n'
@@ -120,7 +119,6 @@ int main(int argc, char **argv)
 
     // read until end of file
     while (!feof(file)) {
-        // read operation and address
         fscanf(file, "%llx %c", &address, &takenChar);
 
         taken = (takenChar == 't') ? true : false; // convert char to bool        
@@ -136,9 +134,7 @@ int main(int argc, char **argv)
     free(predictionTable);
 
     // print out the statistics
-    printf("Number of predictions: %d\n", predictions);
-    printf("Number of mispredictions: %d\n", mispredictions);
-    printf("Misprediction rate: %.2f%%\n", (float)mispredictions / predictions * 100.0);
+    printf("%d %d %.2f\n", M, N, (float)mispredictions / predictions * 100.0);
 
     return 0;
 }
