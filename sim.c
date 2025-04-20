@@ -47,14 +47,15 @@ void predictBranch(unsigned long long int address, bool takenOutcome)
     bool prediction = predictionTable[index] >= 2; // true for taken, false for not taken
 
     // update the prediction table
-    if (takenOutcome) {
-        if (predictionTable[index] < 3) {
-            predictionTable[index]++;
-        }
-    } else {
-        if (predictionTable[index] > 0) {
-            predictionTable[index]--;
-        }
+    if (takenOutcome)
+    {
+        if (predictionTable[index] < 3)        
+            predictionTable[index]++;        
+    }
+    else
+    {
+        if (predictionTable[index] > 0)        
+            predictionTable[index]--;        
     }
 
     // update statistics
@@ -74,7 +75,8 @@ void predictBranch(unsigned long long int address, bool takenOutcome)
 int main(int argc, char **argv)
 {
     // check if the number of arguments is correct
-    if (argc != 5) {
+    if (argc != 5)
+    {
         printf("Error: Must run with 4 arguments: 'gshare' <GPB> <RB> <Trace_File>\n");
         return 1;
     }
@@ -97,7 +99,8 @@ int main(int argc, char **argv)
     // check if the trace file opened successfully
     FILE *file = fopen(TRACE_FILENAME, "r");
 
-    if (!file) {
+    if (!file)
+    {
         printf("Error: Could not read the trace file. Check file name.\n");
         return 1;
     }
@@ -107,7 +110,8 @@ int main(int argc, char **argv)
     GHR = 0; 
     predictionTable = (int*) malloc((1 << M) * sizeof(int)); // 2^M entries
 
-    for (int i = 0; i < (1 << M); i++) {
+    for (int i = 0; i < (1 << M); i++)
+    {
         predictionTable[i] = 2; // initialize all entries to weakly taken
     }
 
@@ -118,7 +122,8 @@ int main(int argc, char **argv)
     bool taken; // true for taken, false for not taken
 
     // read until end of file
-    while (!feof(file)) {
+    while (!feof(file))
+    {
         fscanf(file, "%llx %c", &address, &takenChar);
 
         taken = (takenChar == 't') ? true : false; // convert char to bool        

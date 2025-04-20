@@ -4,7 +4,7 @@ For EEL4768 Spring 2025 at University of Central Florida Professor: Dr. Suboh Su
 
 Compile using: gcc sim.c -o sim.exe
 
-Usage (from Dr. Suboh's documentation):
+Usage:
 
 ./sim gshare <GPB> <RB> <Trace_File>
     1. GPB = The number of PC bits used to index the gshare table.
