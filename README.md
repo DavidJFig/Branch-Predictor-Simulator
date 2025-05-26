@@ -1,6 +1,6 @@
 # Branch-Predictor-Simulator
  
-For EEL4768 Spring 2025 at University of Central Florida Professor: Dr. Suboh Suboh
+For EEL4768 Spring 2025 at University of Central Florida Professor: Dr. Suboh
 
 Compile using: gcc sim.c -o sim.exe
 
